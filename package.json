@@ -4,6 +4,8 @@
   "description": "",
   "main": "index.js",
   "dependencies": {
+    "aws-sdk": "^2.151.0",
+    "body-parser": "^1.18.2",
     "express": "^4.16.2",
     "serverless-dynamodb-local": "^0.2.26",
     "serverless-http": "^1.5.2",

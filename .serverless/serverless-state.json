@@ -10,6 +10,30 @@
       "variableSyntax": "\\${([ ~:a-zA-Z0-9._'\",\\-\\/\\(\\)]+?)}",
       "name": "aws",
       "runtime": "nodejs6.10",
+      "iamRoleStatements": [
+        {
+          "Effect": "Allow",
+          "Action": [
+            "dynamodb:Query",
+            "dynamodb:Scan",
+            "dynamodb:GetItem",
+            "dynamodb:PutItem",
+            "dynamodb:UpdateItem",
+            "dynamodb:DeleteItem"
+          ],
+          "Resource": [
+            {
+              "Fn::GetAtt": [
+                "UsersDynamoDBTable",
+                "Arn"
+              ]
+            }
+          ]
+        }
+      ],
+      "environment": {
+        "USERS_TABLE": "users-table-dev"
+      },
       "versionFunctions": true,
       "remoteFunctionData": null,
       "compiledCloudFormationTemplate": {
@@ -80,6 +104,25 @@
                             "Fn::Sub": "arn:aws:logs:${AWS::Region}:${AWS::AccountId}:log-group:/aws/lambda/my-express-application-dev-app:*:*"
                           }
                         ]
+                      },
+                      {
+                        "Effect": "Allow",
+                        "Action": [
+                          "dynamodb:Query",
+                          "dynamodb:Scan",
+                          "dynamodb:GetItem",
+                          "dynamodb:PutItem",
+                          "dynamodb:UpdateItem",
+                          "dynamodb:DeleteItem"
+                        ],
+                        "Resource": [
+                          {
+                            "Fn::GetAtt": [
+                              "UsersDynamoDBTable",
+                              "Arn"
+                            ]
+                          }
+                        ]
                       }
                     ]
                   }
@@ -106,7 +149,7 @@
                 "S3Bucket": {
                   "Ref": "ServerlessDeploymentBucket"
                 },
-                "S3Key": "serverless/my-express-application/dev/1510822299469-2017-11-16T08:51:39.469Z/my-express-application.zip"
+                "S3Key": "serverless/my-express-application/dev/1510827615308-2017-11-16T10:20:15.308Z/my-express-application.zip"
               },
               "FunctionName": "my-express-application-dev-app",
               "Handler": "index.handler",
@@ -118,21 +161,26 @@
                 ]
               },
               "Runtime": "nodejs6.10",
-              "Timeout": 6
+              "Timeout": 6,
+              "Environment": {
+                "Variables": {
+                  "USERS_TABLE": "users-table-dev"
+                }
+              }
             },
             "DependsOn": [
               "AppLogGroup",
               "IamRoleLambdaExecution"
             ]
           },
-          "AppLambdaVersionrXwctRYG4caRiSYUq9960UaiC0JWdcUaqlfhDipi2F0": {
+          "AppLambdaVersionCUEaZv4us45PVhjPuTiusbFpPNvdtsqyTvv18GkTFkU": {
             "Type": "AWS::Lambda::Version",
             "DeletionPolicy": "Retain",
             "Properties": {
               "FunctionName": {
                 "Ref": "AppLambdaFunction"
               },
-              "CodeSha256": "rXwctRYG4caRiSYUq9960UaiC0JWdcUaqlfhDipi2F0="
+              "CodeSha256": "CUEaZv4us45PVhjPuTiusbFpPNvdtsqyTvv18GkTFkU="
             }
           },
           "ApiGatewayRestApi": {
@@ -237,7 +285,7 @@
               "MethodResponses": []
             }
           },
-          "ApiGatewayDeployment1510822299520": {
+          "ApiGatewayDeployment1510827615489": {
             "Type": "AWS::ApiGateway::Deployment",
             "Properties": {
               "RestApiId": {
@@ -282,6 +330,28 @@
                 ]
               }
             }
+          },
+          "UsersDynamoDBTable": {
+            "Type": "AWS::DynamoDB::Table",
+            "Properties": {
+              "AttributeDefinitions": [
+                {
+                  "AttributeName": "userId",
+                  "AttributeType": "S"
+                }
+              ],
+              "KeySchema": [
+                {
+                  "AttributeName": "userId",
+                  "KeyType": "HASH"
+                }
+              ],
+              "ProvisionedThroughput": {
+                "ReadCapacityUnits": 1,
+                "WriteCapacityUnits": 1
+              },
+              "TableName": "users-table-dev"
+            }
           }
         },
         "Outputs": {
@@ -293,7 +363,7 @@
           "AppLambdaFunctionQualifiedArn": {
             "Description": "Current Lambda function version",
             "Value": {
-              "Ref": "AppLambdaVersionrXwctRYG4caRiSYUq9960UaiC0JWdcUaqlfhDipi2F0"
+              "Ref": "AppLambdaVersionCUEaZv4us45PVhjPuTiusbFpPNvdtsqyTvv18GkTFkU"
             }
           },
           "ServiceEndpoint": {
@@ -331,6 +401,23 @@
       },
       "vpc": {}
     },
+    "custom": {
+      "tableName": "users-table-dev",
+      "dynamodb": {
+        "start": {
+          "port": 8000,
+          "inMemory": true,
+          "migrate": true
+        },
+        "migration": {
+          "dir": "offline/migrations"
+        }
+      }
+    },
+    "plugins": [
+      "serverless-dynamodb-local",
+      "serverless-offline"
+    ],
     "functions": {
       "app": {
         "handler": "index.handler",
@@ -347,10 +434,37 @@
         "vpc": {}
       }
     },
+    "resources": {
+      "Resources": {
+        "UsersDynamoDBTable": {
+          "Type": "AWS::DynamoDB::Table",
+          "Properties": {
+            "AttributeDefinitions": [
+              {
+                "AttributeName": "userId",
+                "AttributeType": "S"
+              }
+            ],
+            "KeySchema": [
+              {
+                "AttributeName": "userId",
+                "KeyType": "HASH"
+              }
+            ],
+            "ProvisionedThroughput": {
+              "ReadCapacityUnits": 1,
+              "WriteCapacityUnits": 1
+            },
+            "TableName": "users-table-dev"
+          }
+        }
+      },
+      "Outputs": {}
+    },
     "artifact": "D:\\EA HYd\\Serverless-practice\\first-project\\.serverless\\my-express-application.zip"
   },
   "package": {
-    "artifactDirectoryName": "serverless/my-express-application/dev/1510822299469-2017-11-16T08:51:39.469Z",
+    "artifactDirectoryName": "serverless/my-express-application/dev/1510827615308-2017-11-16T10:20:15.308Z",
     "artifact": "my-express-application.zip"
   }
 }
